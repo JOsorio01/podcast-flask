@@ -6,7 +6,7 @@ import json
 SOURCE_URL = "https://rss.itunes.apple.com/api/v1/us/podcasts/top-podcasts/all/100/explicit.json"
 
 
-class Podcast:
+class PodcastViews:
     def __init__(self):
         self.podcast_list = self.get_podcast_data()
 
