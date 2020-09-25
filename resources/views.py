@@ -2,13 +2,12 @@ from flask import request
 from flask_restful import Resource
 from sqlalchemy import or_
 
-from .schemas import PodcastSchema
-from .models import Podcast, delete
+from .schemas import PodcastSchema, GenreSchema
+from .models import Podcast, Genre, delete
 from .podcast import PodcastSource
 
 
 class PodcastView(Resource):
-
     def get(self, pk=None):
         if pk:
             results = Podcast.query.get(pk)
@@ -49,4 +48,14 @@ class Last20PodcastView(Resource):
         schema = PodcastSchema(many=True)
         if '.json' in request.path:
             return PodcastSource.response_to_json_file(schema.dump(results))
+        return schema.jsonify(results)
+
+class GenreView(Resource):
+    def get(self, pk=None):
+        if pk:
+            results = Genre.query.get(pk)
+            schema = GenreSchema()
+        else:
+            results = Genre.query.all()
+            schema = GenreSchema(many=True)
         return schema.jsonify(results)
