@@ -1,48 +1,28 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
-from resources.podcast import PodcastViews
+from resources.podcast import PodcastSource
 from flask_sqlalchemy import SQLAlchemy
+
+from resources.models import db
+from resources.views import PodcastView, Top20PodcastView, Last20PodcastView
 
 from datetime import datetime
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.sqlite"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 api = Api(app)
-db = SQLAlchemy(app)
+# Settings
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.sqlite"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
-podcast_genres = db.Table('podcast_genre',
-    db.Column('genre_id', db.Integer, db.ForeignKey('genre.genre_id'), primary_key=True),
-    db.Column('podcast_id', db.Integer, db.ForeignKey('podcast.id'), primary_key=True)
-)
+# Routes
+api.add_resource(PodcastView, '/', '/<int:pk>')
+api.add_resource(Top20PodcastView, '/top20', '/top20.json')
+api.add_resource(Last20PodcastView, '/last20', '/last20.json')
 
-class Genre(db.Model):
-    id = db.Column('genre_id', db.Integer(), primary_key=True)
-    name = db.Column('name', db.String(250))
-    url = db.Column('url', db.Text())
+# Views that take data from the given url source
+podcast = PodcastSource()
 
-
-class Podcast(db.Model):
-    """Model for podcast, removed some non common fields (for test purposes)"""
-    id = db.Column('id', db.Integer(), primary_key=True)
-    artist_name = db.Column('artist_name', db.String(250))
-    release_date = db.Column('release_date', db.Date())
-    name = db.Column('name', db.String(250))
-    copyright = db.Column('copyright', db.Text())
-    url = db.Column('url', db.Text())
-
-    def __init__(self, id, artist_name, release_date, name, copyright, url):
-        self.id = id
-        self.artist_name = artist_name
-        self.release_date = release_date
-        self.name = name
-        self.copyright = copyright
-        self.url = url    
-
-# db.create_all()
-
-podcast = PodcastViews()
 
 class FromSourcePodcastView(Resource):
     def get(self, podcast_id=None):
@@ -66,29 +46,6 @@ class FromSourceLast20Records(Resource):
 api.add_resource(FromSourcePodcastView, '/from_source/', '/from_source/<int:podcast_id>')
 api.add_resource(FromSourceFirst20Records, '/from_source/first20', '/from_source/first20.json')
 api.add_resource(FromSourceLast20Records, '/from_source/last20', '/from_source/last20.json')
-
-@app.route('/create-records')
-def create_records():
-    for p in podcast.podcast_list:
-        db.session.add(
-            Podcast(
-                id=p.get('id', None),
-                artist_name=p.get('artistName', None),
-                release_date=datetime.strptime(p.get('releaseDate', ''), "%Y-%m-%d"),
-                name=p.get('name', None),
-                copyright=p.get('copyright', ''),
-                url=p.get('url', '')
-            )
-        )
-        db.session.commit()
-    return {"msg": "created"}
-        
-@app.route('/')
-def test():
-    p = Podcast.query.all()
-    print(len(p))
-    return {"msg": "asdasd"}
-
 
 if __name__ == '__main__':
     app.run(debug=True)

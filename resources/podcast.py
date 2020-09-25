@@ -6,7 +6,7 @@ import json
 SOURCE_URL = "https://rss.itunes.apple.com/api/v1/us/podcasts/top-podcasts/all/100/explicit.json"
 
 
-class PodcastViews:
+class PodcastSource:
     def __init__(self):
         self.podcast_list = self.get_podcast_data()
 
@@ -44,7 +44,7 @@ class PodcastViews:
     def response_to_json_file(data):
         response = Response(content_type='application/json')
         response.data = json.dumps(data)
-        response.headers['Content-Disposition'] = 'attachment; filename="%s"' % 'top20podcast.json'
+        response.headers['Content-Disposition'] = 'attachment; filename="%s"' % 'data.json'
         return response
 
     def first_20_podcast(self, request):
