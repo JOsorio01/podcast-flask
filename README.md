@@ -68,7 +68,7 @@ python fill_database.py
   
   `http GET http://127.0.0.1:5000/from_source`
 
-  `http GET http://127.0.0.1:5000/from_source?search={search} -> filter matching artist or name`
+  `http GET http://127.0.0.1:5000/from_source?artist={artist}&name={name} -> filter matching artist or name`
   
   `http GET http://127.0.0.1:5000/from_source/{id}`
   
